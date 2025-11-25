@@ -1,6 +1,11 @@
+## 📞 Support Disclaimer
+
+- This script is not an officially supported feature of Zscaler
+- It is created for learning and testing purposes only
+
 # Bedrock Agent via Zscaler AI Guard (ZGuard)
 
-A production-ready AWS Bedrock agent that routes all requests through Zscaler AI Guard for enhanced security, compliance, and monitoring.
+A testing-only AWS Bedrock agent that routes all requests through Zscaler AI Guard for enhanced security, compliance, and monitoring.
 
 ## 📁 What's in This Folder
 
@@ -182,12 +187,6 @@ Your request was blocked by security policy. Review your prompt for:
 - Sensitive data (PII, credentials)
 - Policy violations
 
-## 📞 Support
-
-- **Documentation**: See BEDROCK_ZGUARD_AGENT_GUIDE.md
-- **Zscaler Support**: https://help.zscaler.com
-- **GitHub Issues**: Report bugs in the main repository
-
 ## 📝 Example Session
 
 ```
@@ -246,15 +245,9 @@ pip install boto3  # For comparing with direct AWS access
 ## 📊 Monitoring
 
 View your usage in Zscaler Admin Portal:
-1. Go to **Analytics** → **AI Gateway Logs**
-2. Filter by your API key
-3. See requests, tokens, policies, costs
-
-## 🎓 Learning Resources
-
-- Zscaler AI Guard: Search "Zscaler AI Guard" or "Eclipse"
-- AWS Bedrock: https://docs.aws.amazon.com/bedrock/
-- Model Context Protocol: https://modelcontextprotocol.io/
+1. Go to **ZSlogin** → **ZGuard**
+2. Check dashboard, insights, usage
+3. check the tab of AI Applications
 
 ---
 
