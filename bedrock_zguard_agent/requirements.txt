@@ -1,0 +1,9 @@
+# Requirements for Bedrock Agent via Zscaler AI Guard
+# ======================================================
+
+# Core dependencies
+requests>=2.31.0
+python-dotenv>=1.0.0
+
+# Note: boto3 is NOT required for this agent
+# It only uses HTTP requests via the requests library
