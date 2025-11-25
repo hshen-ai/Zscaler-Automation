@@ -7,4 +7,7 @@ curl-test.md
 test_bedrock_direct.py
 test_zscaler_gateway.py
 ZSCALER_AI_GATEWAY_BEDROCK_SETUP.md
-
+bedrock_agent.py
+cloud_nss_agent.py
+README.md
+requirements.txt
