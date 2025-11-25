@@ -3,8 +3,6 @@ cloud_nss_config_20251116_215930.json
 ZscalerRootCert.pem
 API_TESTING_GUIDE.md
 AWS_ACCESS_KEY_SETUP.md
-bedrock_agent_with_ZGuard.py
-BEDROCK_ZGUARD_AGENT_GUIDE.md
 curl-test.md
 test_bedrock_direct.py
 test_zscaler_gateway.py
