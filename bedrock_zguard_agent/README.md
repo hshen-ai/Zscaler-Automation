@@ -146,16 +146,18 @@ python bedrock_agent_with_ZGuard.py
 
 ## 🆚 Comparison with Direct AWS Access
 
-### bedrock_agent.py (Direct AWS)
+### bedrock_mcp_agent.py (Direct AWS)
 - ❌ No security policies
 - ❌ No audit logging
 - ❌ No DLP protection
+- ✅ Direct AWS Bedrock integration with MCP tools
 
 ### bedrock_agent_with_ZGuard.py (This Agent)
 - ✅ Enterprise security
 - ✅ Complete audit trail
 - ✅ DLP and content filtering
 - ✅ Centralized monitoring
+- ✅ All MCP tools via ZGuard protection
 
 ## 🐛 Troubleshooting
 

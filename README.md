@@ -5,8 +5,7 @@
 This repository contains powerful AI-driven automation agents for Zscaler operations using AWS Bedrock:
 
 1. **Bedrock MCP Agent** (`bedrock_mcp_agent.py`) - AWS Bedrock-powered agent with Zscaler MCP server integration for AI-driven Zscaler automation
-2. **Bedrock AI Agent** (`bedrock_agent.py`) - Direct integration with AWS Bedrock for Zscaler operations
-3. **Bedrock ZGuard Agent** (`bedrock_zguard_agent/`) - Enhanced security with Zscaler AI Gateway (ZGuard) integration for prompt security and compliance
+2. **Bedrock ZGuard Agent** (`bedrock_zguard_agent/`) - Enhanced security with Zscaler AI Gateway (ZGuard) integration for prompt security and compliance
 
 ## Core Dependencies
 
@@ -27,6 +26,13 @@ An intelligent agent powered by **AWS Bedrock's Claude 3.5 Sonnet** model that i
 - Leverage 100+ Zscaler MCP tools (ZPA, ZIA, ZDX, etc.)
 - Perform complex multi-step operations autonomously
 - Provide intelligent insights and recommendations
+
+**Key Features:**
+- Direct AWS Bedrock integration (no proxy)
+- Comprehensive error handling and retry logic
+- API call tracking and detailed logging
+- Interactive chat interface
+- Support for complex multi-step operations
 
 ### Bedrock ZGuard Agent
 
@@ -173,14 +179,6 @@ python3 bedrock_mcp_agent.py
 2. Dev-Environment-Apps
 3. Production-Web-Services
 ...
-```
-
-### Bedrock AI Agent
-
-Start the direct Bedrock agent:
-
-```bash
-python3 bedrock_agent.py
 ```
 
 ### Bedrock ZGuard Agent
