@@ -76,11 +76,15 @@ pip install -r requirements.txt
 
 ### 3. Zscaler MCP Server
 
-Install and configure the Zscaler MCP server for full functionality:
+Install and configure the Zscaler MCP server for full functionality.
+
+**Note:** The Zscaler MCP server referenced in this project is available at: https://github.com/zscaler/zscaler-mcp-server
 
 ```bash
 # Clone and set up Zscaler MCP server
-# Follow the MCP server installation guide
+git clone https://github.com/zscaler/zscaler-mcp-server.git
+cd zscaler-mcp-server
+# Follow the installation guide in the repository
 ```
 
 ### 4. Zscaler AI Gateway (Optional - for ZGuard Agent)
