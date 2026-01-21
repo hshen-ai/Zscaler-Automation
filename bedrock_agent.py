@@ -18,7 +18,7 @@ import subprocess
 import sys
 from typing import Dict, List, Any, Optional
 from datetime import datetime
-import requests
+import boto3
 from dotenv import load_dotenv
 
 # Load environment variables
@@ -177,34 +177,34 @@ class ZscalerMCPClient:
 
 
 class BedrockAgent:
-    """AWS Bedrock agent with Zscaler AI Guard (ZGuard) and MCP integration."""
+    """AWS Bedrock agent with Zscaler MCP integration."""
     
     def __init__(
         self,
         model_id: str,
-        zscaler_gateway_url: str,
-        zguard_api_key: str,
-        max_tokens: int,
-        temperature: float
+        region: str,
+        max_tokens: int = 4096,
+        temperature: float = 0.7
     ):
         """
-        Initialize Bedrock agent via Zscaler AI Guard.
+        Initialize Bedrock agent.
         
         Args:
             model_id: Bedrock model ID
-            zscaler_gateway_url: Zscaler AI Guard base URL
-            zguard_api_key: Zscaler AI Guard API key
+            region: AWS region
             max_tokens: Maximum tokens for response
             temperature: Model temperature
         """
         self.model_id = model_id
-        self.zscaler_gateway_url = zscaler_gateway_url
-        self.zguard_api_key = zguard_api_key
+        self.region = region
         self.max_tokens = max_tokens
         self.temperature = temperature
         
-        # Build the full endpoint URL
-        self.endpoint_url = f"{zscaler_gateway_url}/model/{model_id}/invoke"
+        # Initialize Bedrock client
+        self.bedrock = boto3.client(
+            service_name='bedrock-runtime',
+            region_name=region
+        )
         
         # Initialize MCP client
         mcp_path = os.getenv("MCP_SERVER_PATH")
@@ -216,16 +216,14 @@ class BedrockAgent:
         self.mcp_client = ZscalerMCPClient(mcp_path, mcp_module)
         self.conversation_history = []
         self.available_tools = []
-        self.api_call_count = 0  # Track API calls to ZGuard
         
     def start(self):
         """Start the agent and MCP server."""
         print("\n" + "="*80)
-        print("AWS BEDROCK VIA Zscaler AI Guard + MCP INTEGRATION")
+        print("AWS BEDROCK AGENT WITH ZSCALER MCP INTEGRATION")
         print("="*80)
         print(f"\nModel: {self.model_id}")
-        print(f"Gateway: {self.zscaler_gateway_url}")
-        print(f"Endpoint: {self.endpoint_url}")
+        print(f"Region: {self.region}")
         print("\n" + "="*80 + "\n")
         
         # Start MCP server
@@ -263,7 +261,7 @@ class BedrockAgent:
     
     def invoke_bedrock(self, messages: List[Dict], tools: List[Dict] = None) -> Dict:
         """
-        Invoke Bedrock model via Zscaler AI Guard.
+        Invoke Bedrock model.
         
         Args:
             messages: Conversation messages
@@ -272,11 +270,6 @@ class BedrockAgent:
         Returns:
             Model response
         """
-        # Increment API call counter
-        self.api_call_count += 1
-        print(f"\n{'='*80}")
-        print(f"[ZGUARD] API Call #{self.api_call_count} to AI Guard")
-        print(f"{'='*80}")
         request_body = {
             "anthropic_version": "bedrock-2023-05-31",
             "max_tokens": self.max_tokens,
@@ -287,102 +280,18 @@ class BedrockAgent:
         if tools:
             request_body["tools"] = tools
         
-        headers = {
-            "X-ApiKey": self.zguard_api_key,
-            "Content-Type": "application/json"
-        }
-        
         try:
-            print(f"[ZGUARD] Sending request to: {self.endpoint_url}")
-            
-            response = requests.post(
-                self.endpoint_url,
-                headers=headers,
-                json=request_body,
-                timeout=120
+            response = self.bedrock.invoke_model(
+                modelId=self.model_id,
+                body=json.dumps(request_body)
             )
             
-            # Handle different HTTP status codes with user-friendly messages
-            if response.status_code == 200:
-                response_body = response.json()
-                print(f"[ZGUARD] ✓ API Call #{self.api_call_count} successful (status: {response.status_code})")
-                return response_body
+            response_body = json.loads(response['body'].read())
+            return response_body
             
-            # Error handling with specific messages
-            elif response.status_code == 400:
-                error_msg = "Bad Request: The request body was invalid. Please check your input format."
-                print(f"[ZGUARD ERROR] HTTP 400: {error_msg}")
-                print(f"[ZGUARD ERROR] Response: {response.text}")
-                return {"error": error_msg}
-            
-            elif response.status_code == 401:
-                error_msg = "Unauthorized: Authentication failed. Please check your API key (ZGUARDSECRET) or network access permissions."
-                print(f"[ZGUARD ERROR] HTTP 401: {error_msg}")
-                return {"error": error_msg}
-            
-            elif response.status_code == 403:
-                error_msg = "Forbidden: Your request was blocked by Zscaler security policy. This may indicate:\n"
-                error_msg += "  - Content policy violation (e.g., inappropriate content, hate speech)\n"
-                error_msg += "  - DLP policy blocking sensitive data\n"
-                error_msg += "  - Security policy restriction\n"
-                error_msg += "Please review your input and try again with appropriate content."
-                print(f"[ZGUARD ERROR] HTTP 403: Policy blocked the request")
-                print(f"[ZGUARD ERROR] {error_msg}")
-                return {"error": error_msg}
-            
-            elif response.status_code == 404:
-                error_msg = "Not Found: The AI Gateway policy or endpoint was not found. Please verify your configuration."
-                print(f"[ZGUARD ERROR] HTTP 404: {error_msg}")
-                return {"error": error_msg}
-            
-            elif response.status_code == 429:
-                error_msg = "Rate Limit Exceeded: Too many requests. Please wait a moment and try again."
-                print(f"[ZGUARD ERROR] HTTP 429: {error_msg}")
-                return {"error": error_msg}
-            
-            elif response.status_code == 500:
-                error_msg = "Internal Server Error: Zscaler AI Guard encountered an error. Please try again later."
-                print(f"[ZGUARD ERROR] HTTP 500: {error_msg}")
-                print(f"[ZGUARD ERROR] Response: {response.text}")
-                return {"error": error_msg}
-            
-            elif response.status_code == 502:
-                error_msg = "Bad Gateway: Cannot connect to AWS Bedrock backend. This usually means:\n"
-                error_msg += "  - AWS Bedrock is not configured in Zscaler AI Guard\n"
-                error_msg += "  - AWS credentials are incorrect\n"
-                error_msg += "  - The model is not enabled\n"
-                error_msg += "Please contact your Zscaler administrator to configure AWS Bedrock backend."
-                print(f"[ZGUARD ERROR] HTTP 502: {error_msg}")
-                return {"error": error_msg}
-            
-            elif response.status_code == 503:
-                error_msg = "Service Unavailable: The AI Gateway is temporarily unavailable. Please try again later."
-                print(f"[ZGUARD ERROR] HTTP 503: {error_msg}")
-                return {"error": error_msg}
-            
-            elif response.status_code == 504:
-                error_msg = "Gateway Timeout: The request to AWS Bedrock timed out. Please try again."
-                print(f"[ZGUARD ERROR] HTTP 504: {error_msg}")
-                return {"error": error_msg}
-            
-            else:
-                error_msg = f"HTTP {response.status_code}: {response.text}"
-                print(f"[ZGUARD ERROR] {error_msg}")
-                return {"error": error_msg}
-            
-        except requests.exceptions.Timeout:
-            error_msg = "Request timeout (>120s): The request took too long to complete. Please try again."
-            print(f"[ZGUARD ERROR] {error_msg}")
-            return {"error": error_msg}
-        except requests.exceptions.ConnectionError as e:
-            error_msg = f"Connection Error: Unable to connect to Zscaler AI Guard. Please check your network connection."
-            print(f"[ZGUARD ERROR] {error_msg}")
-            print(f"[ZGUARD ERROR] Details: {str(e)}")
-            return {"error": error_msg}
         except Exception as e:
-            error_msg = f"Unexpected error: {str(e)}"
-            print(f"[ZGUARD ERROR] {error_msg}")
-            return {"error": error_msg}
+            print(f"[BEDROCK ERROR] {str(e)}")
+            return {"error": str(e)}
     
     def process_tool_use(self, tool_use_block: Dict) -> Dict:
         """
@@ -422,9 +331,6 @@ class BedrockAgent:
         """
         print(f"\n[USER] {user_message}")
         
-        # Reset API call counter for this chat turn
-        self.api_call_count = 0
-        
         # Add user message to history
         self.conversation_history.append({
             "role": "user",
@@ -435,18 +341,13 @@ class BedrockAgent:
         tools = self.format_tools_for_bedrock() if self.available_tools else None
         
         # Conversation loop to handle tool use
-        # Note: Each iteration makes an API call to ZGuard
         max_iterations = 5
         iteration = 0
         
-        print(f"\n[INFO] Starting agentic loop (max {max_iterations} iterations)")
-        print(f"[INFO] Each iteration may make an API call to ZGuard if tools are used\n")
-        
         while iteration < max_iterations:
             iteration += 1
-            print(f"[AGENT] Starting iteration {iteration}/{max_iterations}")
             
-            # Invoke model - THIS MAKES AN API CALL TO ZGUARD
+            # Invoke model
             response = self.invoke_bedrock(self.conversation_history, tools)
             
             if "error" in response:
@@ -464,7 +365,7 @@ class BedrockAgent:
             
             # Check if tool use is needed
             if stop_reason == "tool_use":
-                print(f"\n[AGENT] Model requested tool use - will need another API call after processing tools")
+                print("\n[AGENT] Processing tool use requests...")
                 
                 # Collect tool results
                 tool_results = []
@@ -485,8 +386,6 @@ class BedrockAgent:
                 self.conversation_history.extend(tool_results)
                 
                 # Continue conversation with tool results
-                # IMPORTANT: This loops back and makes ANOTHER API call to ZGuard
-                print(f"[AGENT] Tool results added to history. Continuing to iteration {iteration + 1}...")
                 continue
             
             elif stop_reason == "end_turn":
@@ -496,9 +395,6 @@ class BedrockAgent:
                     if block.get("type") == "text":
                         response_text += block.get("text", "")
                 
-                print(f"\n{'='*80}")
-                print(f"[SUMMARY] Completed in {self.api_call_count} API call(s) to ZGuard")
-                print(f"{'='*80}")
                 print(f"\n[AGENT] {response_text}")
                 return response_text
             
@@ -541,31 +437,21 @@ def main():
     """Main entry point."""
     # Load configuration
     model_id = os.getenv("BEDROCK_MODEL_ID")
-    zscaler_gateway_url = os.getenv("ZSCALER_GATEWAY_URL")
-    zguard_api_key = os.getenv("ZGUARDSECRET")
-    max_tokens_str = os.getenv("BEDROCK_MAX_TOKENS")
-    temperature_str = os.getenv("BEDROCK_TEMPERATURE")
+    region = os.getenv("AWS_REGION")
+    max_tokens = int(os.getenv("BEDROCK_MAX_TOKENS", "4096"))
+    temperature = float(os.getenv("BEDROCK_TEMPERATURE", "0.7"))
     
     # Validate configuration
-    if not all([model_id, zscaler_gateway_url, zguard_api_key, max_tokens_str, temperature_str]):
+    if not all([model_id, region]):
         print("[ERROR] Missing required environment variables")
-        print("Required: BEDROCK_MODEL_ID, ZSCALER_GATEWAY_URL, ZGUARDSECRET, BEDROCK_MAX_TOKENS, BEDROCK_TEMPERATURE")
-        sys.exit(1)
-    
-    # Convert to appropriate types
-    try:
-        max_tokens = int(max_tokens_str)
-        temperature = float(temperature_str)
-    except ValueError as e:
-        print(f"[ERROR] Invalid value for BEDROCK_MAX_TOKENS or BEDROCK_TEMPERATURE: {e}")
+        print("Required: BEDROCK_MODEL_ID, AWS_REGION")
         sys.exit(1)
     
     try:
         # Create and start agent
         agent = BedrockAgent(
             model_id=model_id,
-            zscaler_gateway_url=zscaler_gateway_url,
-            zguard_api_key=zguard_api_key,
+            region=region,
             max_tokens=max_tokens,
             temperature=temperature
         )

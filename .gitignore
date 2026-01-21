@@ -1,13 +1,39 @@
+# Environment files with secrets
 .env
-cloud_nss_config_20251116_215930.json
-ZscalerRootCert.pem
-API_TESTING_GUIDE.md
-AWS_ACCESS_KEY_SETUP.md
-curl-test.md
-test_bedrock_direct.py
-test_zscaler_gateway.py
-ZSCALER_AI_GATEWAY_BEDROCK_SETUP.md
-bedrock_agent.py
-cloud_nss_agent.py
-README.md
-requirements.txt
+*.env
+!.env.example
+
+# Credentials and certificates
+*.pem
+*.key
+*.crt
+*credentials*
+*secret*
+
+# Config files with sensitive data
+cloud_nss_config_*.json
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Virtual environments
+venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# MCP settings (may contain paths)
+**/cline_mcp_settings.json
