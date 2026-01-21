@@ -1,258 +1,399 @@
-## 📞 Support Disclaimer
+# Zscaler Automation with AWS Bedrock
 
-- This script is not an officially supported feature of Zscaler
-- It is created for learning and testing purposes only
+## Overview
 
-# Bedrock Agent via Zscaler AI Guard (ZGuard)
+This repository contains powerful AI-driven automation agents for Zscaler operations using AWS Bedrock:
 
-A testing-only AWS Bedrock agent that routes all requests through Zscaler AI Guard for enhanced security, compliance, and monitoring.
+1. **Bedrock MCP Agent** (`bedrock_mcp_agent.py`) - AWS Bedrock-powered agent with Zscaler MCP server integration for AI-driven Zscaler automation
+2. **Bedrock ZGuard Agent** (`bedrock_zguard_agent/`) - Enhanced security with Zscaler AI Gateway (ZGuard) integration for prompt security and compliance
 
-## 📁 What's in This Folder
+## Core Dependencies
 
 ```
-bedrock_zguard_agent/
-├── README.md                           # This file
-├── .env.example                        # Clean environment configuration template
-├── bedrock_agent_with_ZGuard.py       # Main agent script
-└── BEDROCK_ZGUARD_AGENT_GUIDE.md     # Complete documentation
+python-dotenv==1.1.1
+boto3==1.35.0
 ```
 
-## 🚀 Quick Start
+See `requirements.txt` for complete dependency list.
 
-### 1. Setup Environment
+## What Can These Agents Do?
+
+### Bedrock MCP Agent
+
+An intelligent agent powered by **AWS Bedrock's Claude 3.5 Sonnet** model that integrates with the **Zscaler MCP server** to provide natural language automation of Zscaler operations. The agent can:
+
+- Execute Zscaler operations using natural language commands
+- Leverage 100+ Zscaler MCP tools (ZPA, ZIA, ZDX, etc.)
+- Perform complex multi-step operations autonomously
+- Provide intelligent insights and recommendations
+
+**Key Features:**
+- Direct AWS Bedrock integration (no proxy)
+- Comprehensive error handling and retry logic
+- API call tracking and detailed logging
+- Interactive chat interface
+- Support for complex multi-step operations
+
+### Bedrock ZGuard Agent
+
+Enhanced version with **Zscaler AI Gateway (ZGuard)** integration that adds:
+
+- **Prompt Security** - Detects and blocks malicious prompts, jailbreak attempts, and injection attacks
+- **PII Protection** - Identifies and redacts sensitive information (SSNs, credit cards, etc.)
+- **Compliance Controls** - Enforces content policies and regulatory requirements
+- **Audit Logging** - Complete visibility into AI interactions
+
+## Prerequisites
+
+### 1. AWS Configuration
+
+- AWS account with Bedrock access enabled
+- Claude 3.5 Sonnet model enabled in your region
+- AWS credentials configured via AWS CLI or environment variables
 
 ```bash
-# Navigate to this folder
-cd bedrock_zguard_agent
+# Install AWS CLI (if not already installed)
+# macOS
+brew install awscli
 
-# Copy the example .env file
-cp .env.example .env
+# Ubuntu/Debian
+sudo apt-get install awscli
 
-# Edit .env with your credentials
-# Required: ZGUARDSECRET, ZSCALER_CLIENT_ID, ZSCALER_CLIENT_SECRET, ZSCALER_CUSTOMER_ID
+# Configure AWS credentials
+aws configure
 ```
 
-### 2. Install Dependencies
+**Note:** For detailed AWS access key setup, see [AWS_ACCESS_KEY_SETUP.md](AWS_ACCESS_KEY_SETUP.md)
+
+### 2. Python Environment
+
+- Python 3.9 or higher
+- Required Python packages
 
 ```bash
-pip install requests python-dotenv
+pip install -r requirements.txt
 ```
 
-### 3. Run the Agent
+### 3. Zscaler MCP Server
+
+Install and configure the Zscaler MCP server for full functionality.
+
+**Note:** The Zscaler MCP server referenced in this project is available at: https://github.com/zscaler/zscaler-mcp-server
 
 ```bash
-python bedrock_agent_with_ZGuard.py
+# Clone and set up Zscaler MCP server
+git clone https://github.com/zscaler/zscaler-mcp-server.git
+cd zscaler-mcp-server
+# Follow the installation guide in the repository
 ```
 
-## 🔑 Required Credentials
+### 4. Zscaler AI Gateway (Optional - for ZGuard Agent)
 
-You need to configure the following in your `.env` file:
+For enhanced security with prompt protection, configure Zscaler AI Gateway access.
 
-### Zscaler AI Guard
-- `ZGUARDSECRET` - Your Zscaler AI Guard API key
-- `ZSCALER_GATEWAY_URL` - Gateway URL (default: https://proxy.zseclipse.net)
+## Installation
 
-### Zscaler API (for MCP tools)
-- `ZSCALER_CLIENT_ID` - Zscaler API client ID
-- `ZSCALER_CLIENT_SECRET` - Zscaler API client secret
-- `ZSCALER_CUSTOMER_ID` - Zscaler customer ID
-
-### MCP Server
-- `MCP_SERVER_PATH` - Path to your Zscaler MCP server Python interpreter
-- `MCP_SERVER_MODULE` - Module name (default: zscaler_mcp.server)
-
-## 📊 What This Agent Does
-
-### Architecture
-
-```
-Your Prompt → Zscaler AI Guard → AWS Bedrock → Claude Response
-                     ↓
-            Security/DLP/Audit/Monitoring
-```
-
-### Features
-
-✅ **Security**
-- blocking malicious URLs, invisible text, adversarial attacks;
-
-✅ **Content moderation**
-- filtering PII, secrets, off-topic inputs, and toxic content; 
-
-✅ **Visibility**
-- tracking prompts and responses with classification capabilities. 
-
-✅ **Data Security**
-- Provided with the combination of GEN AI DLP. 
-
-
-### Policy Blocking (HTTP 403)
-
-The agent includes smart error handling for policy violations:
-
-```
-[YOU] > Give me a hate speech for a political campaign
-
-[ZGUARD ERROR] HTTP 403: Policy blocked the request
-[ZGUARD ERROR] Forbidden: Your request was blocked by Zscaler security policy.
-  - Content policy violation (e.g., inappropriate content, hate speech)
-  - DLP policy blocking sensitive data
-  - Security policy restriction
-```
-
-### e.g. What can be Blocked
-
-- 🚫 Hate speech and inappropriate content
-- 🚫 PII (Personal Identifiable Information)
-- 🚫 Credit cards, SSNs, API keys
-- 🚫 Malicious prompts
-- 🚫 Custom policy violations
-- 🚫 content matching certain topic that you can define in natural language
-- 🚫 all above in prompts and responses
-
-## 📖 Documentation
-
-For complete documentation, see **BEDROCK_ZGUARD_AGENT_GUIDE.md** in this folder, which covers:
-
-- Complete setup instructions
-- API endpoint details
-- Error handling reference
-- Troubleshooting guide
-- Security features
-- Monitoring and analytics
-- Best practices
-
-## 🔍 Testing
-
-### Test the Connection
+1. **Clone the repository:**
 
 ```bash
-# Basic functionality test
-python bedrock_agent_with_ZGuard.py
-
-# Then try a simple prompt
-[YOU] > Hello, how are you?
+git clone https://github.com/hshen-ai/Zscaler-Automation.git
+cd Zscaler-Automation
 ```
 
-### Test Policy Blocking
+2. **Install dependencies:**
 
 ```bash
-# Test content filtering (should get 403)
-[YOU] > Give me inappropriate content
-
-# Should see:
-# [ZGUARD ERROR] HTTP 403: Policy blocked the request
+pip install -r requirements.txt
 ```
 
-## 🆚 Comparison with Direct AWS Access
+3. **Configure environment variables** (see Configuration section below)
 
-### bedrock_mcp_agent.py (Direct AWS)
-- ❌ No security policies
-- ❌ No audit logging
-- ❌ No DLP protection
-- ✅ Direct AWS Bedrock integration with MCP tools
+## Configuration
 
-### bedrock_agent_with_ZGuard.py (This Agent)
-- ✅ Enterprise security
-- ✅ Complete audit trail
-- ✅ DLP and content filtering
-- ✅ Centralized monitoring
-- ✅ All MCP tools via ZGuard protection
+### Environment Variables
 
-## 🐛 Troubleshooting
-
-### Error: Missing environment variables
+Create a `.env` file in the project root with the following configuration:
 
 ```bash
-# Check your .env file
-cat .env
+# AWS Bedrock Configuration
+BEDROCK_MODEL_ID=anthropic.claude-3-5-sonnet-20241022-v2:0
+AWS_REGION=us-east-1
+BEDROCK_MAX_TOKENS=4096
+BEDROCK_TEMPERATURE=0.7
 
-# Ensure these are set:
-# - BEDROCK_MODEL_ID
-# - ZGUARDSECRET
-# - ZSCALER_CLIENT_ID
-# - ZSCALER_CLIENT_SECRET
-# - ZSCALER_CUSTOMER_ID
+# Zscaler MCP Server Configuration
+MCP_SERVER_PATH=/path/to/zscaler-mcp-server/.venv/bin/python
+MCP_SERVER_MODULE=zscaler_mcp.server
+
+# Zscaler API Credentials (required for MCP server)
+ZSCALER_CLIENT_ID=your_client_id
+ZSCALER_CLIENT_SECRET=your_client_secret
+ZSCALER_CUSTOMER_ID=your_customer_id
+
+# ZIA Configuration (optional)
+ZIA_CLOUD=zscaler.net
+ZIA_USERNAME=your_zia_username
+ZIA_PASSWORD=your_zia_password
+ZIA_API_KEY=your_zia_api_key
+
+# Zscaler AI Gateway (ZGuard) - Optional for enhanced security
+ZGUARD_ENDPOINT=https://your-tenant.zpagw.net
+ZGUARD_API_KEY=your_zguard_api_key
 ```
 
-### Error: HTTP 502 Bad Gateway
+### Configuration Parameters
 
-AWS Bedrock backend not configured in Zscaler. Contact your Zscaler admin to:
-1. Add AWS Bedrock as backend provider
-2. Configure AWS credentials
-3. Enable Claude 3.5 Sonnet model
+| Parameter | Description | Required | Default |
+|-----------|-------------|----------|---------|
+| `BEDROCK_MODEL_ID` | AWS Bedrock model identifier | Yes | Claude 3.5 Sonnet |
+| `AWS_REGION` | AWS region for Bedrock | Yes | us-east-1 |
+| `BEDROCK_MAX_TOKENS` | Maximum response tokens | No | 4096 |
+| `BEDROCK_TEMPERATURE` | Model creativity (0-1) | No | 0.7 |
+| `MCP_SERVER_PATH` | Path to MCP Python interpreter | Yes* | - |
+| `MCP_SERVER_MODULE` | MCP server module name | Yes* | zscaler_mcp.server |
+| `ZSCALER_CLIENT_ID` | Zscaler API client ID | Yes | - |
+| `ZSCALER_CLIENT_SECRET` | Zscaler API client secret | Yes | - |
+| `ZSCALER_CUSTOMER_ID` | Zscaler customer/tenant ID | Yes | - |
+| `ZGUARD_ENDPOINT` | Zscaler AI Gateway endpoint | No** | - |
+| `ZGUARD_API_KEY` | ZGuard API authentication key | No** | - |
 
-### Error: HTTP 403 Forbidden
+\* Required for MCP agent functionality  
+\*\* Required for ZGuard agent only
 
-Your request was blocked by security policy. Review your prompt for:
-- Inappropriate content
-- Sensitive data (PII, credentials)
-- Policy violations
+## Usage
 
-## 📝 Example Session
+### Bedrock MCP Agent
+
+Start the MCP-integrated agent:
+
+```bash
+python3 bedrock_mcp_agent.py
+```
+
+**Example interactions:**
 
 ```
-================================================================================
-AWS BEDROCK VIA Zscaler AI Guard + MCP INTEGRATION
-================================================================================
+[YOU] > List all ZPA application segments
 
-Model: anthropic.claude-3-5-sonnet-20240620-v1:0
-Gateway: https://proxy.zseclipse.net
-Endpoint: https://proxy.zseclipse.net/model/.../invoke
-
-[YOU] > List my ZPA application segments
-
-[ZGUARD] Sending request to: https://proxy.zseclipse.net/model/...
-[ZGUARD] Request successful (status: 200)
-[AGENT] Model wants to use tool: zpa_list_application_segments
+[AGENT] Let me retrieve that information for you...
 [MCP] Calling tool: zpa_list_application_segments
-[MCP] Tool executed successfully
 
-[AGENT] I found 15 ZPA application segments in your environment:
-
-1. HR Portal (enabled)
-   - Domain: hr.company.com
-   ...
+[AGENT] I found 15 application segments in your ZPA tenant:
+1. Corporate-Apps-Segment
+2. Dev-Environment-Apps
+3. Production-Web-Services
+...
 ```
 
-## 🔐 Security Best Practices
+### Bedrock ZGuard Agent
 
-1. **Never commit .env file** - Use .env.example as template
-2. **Rotate API keys** - Every 90 days minimum
-3. **Use separate keys** - Different keys for dev/staging/prod
-4. **Monitor usage** - Check Zscaler Analytics regularly
-5. **Test policies** - Verify security policies work as expected
-
-## 📦 Dependencies
+For enhanced security with prompt protection:
 
 ```bash
-pip install requests python-dotenv
+cd bedrock_zguard_agent
+python3 bedrock_agent_with_ZGuard.py
 ```
 
-Optional (for testing):
+The ZGuard agent provides additional security layers including:
+- Malicious prompt detection
+- PII redaction
+- Content policy enforcement
+- Detailed audit logging
+
+## Example Commands
+
+### Query Information
+
+```
+- "List all ZPA application segments"
+- "Show me the firewall rules in ZIA"
+- "What are the current ZDX alerts?"
+- "Get details about the application segment named 'Corporate-Apps'"
+```
+
+### Complex Operations
+
+```
+- "Create a new ZPA application segment for the HR portal"
+- "Analyze the health of my ZPA connectors"
+- "Find all application segments using port 443"
+- "Show me which users have accessed the Finance app today"
+```
+
+### Insights and Analysis
+
+```
+- "What's the status of my Zscaler infrastructure?"
+- "Are there any security issues I should be aware of?"
+- "Which applications have the most traffic?"
+- "Recommend optimizations for my ZPA configuration"
+```
+
+## Architecture
+
+```
+┌─────────────┐
+│    User     │
+│  (Natural   │
+│  Language)  │
+└──────┬──────┘
+       │
+       ▼
+┌─────────────────────────┐
+│   Zscaler AI Gateway    │  (Optional - ZGuard Agent)
+│   ├─ Prompt Security    │
+│   ├─ PII Protection     │
+│   └─ Compliance Check   │
+└──────┬──────────────────┘
+       │
+       ▼
+┌─────────────────────────┐
+│   AWS Bedrock           │
+│   Claude 3.5 Sonnet     │
+│   ├─ Understands query │
+│   ├─ Plans actions     │
+│   └─ Calls tools       │
+└──────┬──────────────────┘
+       │
+       ▼
+┌─────────────────────────┐
+│   Zscaler MCP Server    │
+│   ├─ ZPA Tools (40+)    │
+│   ├─ ZIA Tools (30+)    │
+│   ├─ ZDX Tools (15+)    │
+│   └─ Other Services     │
+└──────┬──────────────────┘
+       │
+       ▼
+┌─────────────────────────┐
+│   Zscaler APIs          │
+│   ├─ ZPA API            │
+│   ├─ ZIA API            │
+│   ├─ ZDX API            │
+│   └─ Other APIs         │
+└─────────────────────────┘
+```
+
+## Available Tool Categories
+
+### ZPA (Zscaler Private Access)
+- Application Segments
+- App Connector Groups
+- Server Groups
+- Service Edge Groups
+- Access Policies
+- Segment Groups
+- Provisioning Keys
+- And more...
+
+### ZIA (Zscaler Internet Access)
+- Firewall Rules
+- URL Filtering Rules
+- DLP Rules
+- Cloud Applications
+- Locations
+- VPN Credentials
+- And more...
+
+### ZDX (Zscaler Digital Experience)
+- Device Health
+- Application Performance
+- User Experience Metrics
+- Alerts and Monitoring
+- And more...
+
+## Security Features
+
+- ✅ **Read-Only by Default** - MCP server operates in read-only mode unless explicitly enabled
+- ✅ **AWS IAM Integration** - Uses standard AWS credential chain (IAM roles, profiles)
+- ✅ **API Permission Control** - Limited by your Zscaler API client permissions
+- ✅ **Audit Logging** - All operations are logged for tracking
+- ✅ **Prompt Security** - ZGuard agent detects malicious prompts (when enabled)
+- ✅ **PII Protection** - Automatic detection and redaction of sensitive data (ZGuard)
+- ✅ **Compliance Controls** - Enforces content policies (ZGuard)
+
+## Troubleshooting
+
+### Bedrock Access Issues
+
+**Problem:** Cannot access Bedrock model
+
+**Solution:**
 ```bash
-pip install boto3  # For comparing with direct AWS access
+# Check if Claude model is available in your region
+aws bedrock list-foundation-models --region your-region
+
+# Request model access in AWS Console if needed
+# AWS Console > Bedrock > Model Access
 ```
 
-## 🚦 Status Indicators
+### MCP Server Connection Issues
 
-| Indicator | Meaning |
-|-----------|---------|
-| `[ZGUARD]` | Zscaler AI Guard operation |
-| `[MCP]` | Zscaler MCP tool operation |
-| `[AGENT]` | Claude model response |
-| `[ZGUARD ERROR]` | Error from Zscaler gateway |
-| `[MCP ERROR]` | Error from MCP tool |
+**Problem:** Failed to start MCP server
 
-## 📊 Monitoring
+**Solution:**
+- Verify `MCP_SERVER_PATH` points to correct Python interpreter
+- Check Zscaler credentials are valid in `.env`
+- Ensure MCP server dependencies are installed
 
-View your usage in Zscaler Admin Portal:
-1. Go to **ZSlogin** → **ZGuard**
-2. Check dashboard, insights, usage
-3. check the tab of AI Applications
+### AWS Credentials Issues
+
+**Problem:** AWS authentication errors
+
+**Solution:**
+- Verify AWS credentials are configured: `aws sts get-caller-identity`
+- Check IAM permissions for Bedrock access
+- See [AWS_ACCESS_KEY_SETUP.md](AWS_ACCESS_KEY_SETUP.md) for detailed setup
+
+### No Tools Available
+
+**Problem:** Agent starts but shows 0 tools available
+
+**Solution:**
+- Check MCP server logs for errors
+- Verify Zscaler API credentials
+- Ensure write operations are enabled if needed
+
+## Cost Estimation
+
+### AWS Bedrock Costs
+
+- **Input tokens:** ~$0.003 per 1K tokens
+- **Output tokens:** ~$0.015 per 1K tokens
+
+**Example:** 100 queries/day ≈ $10-20/month
+
+### Optimization Tips
+
+- Use lower temperature (0.5) for deterministic queries
+- Reduce `BEDROCK_MAX_TOKENS` if responses are verbose
+- Cache frequent queries when possible
+
+## Documentation
+
+- [Bedrock MCP Agent Guide](BEDROCK_MCP_AGENT_GUIDE.md) - Detailed setup and usage
+- [Bedrock ZGuard Agent Guide](bedrock_zguard_agent/BEDROCK_ZGUARD_AGENT_GUIDE.md) - ZGuard integration details
+- [API Testing Guide](API_TESTING_GUIDE.md) - API testing examples
+- [AWS Access Key Setup](AWS_ACCESS_KEY_SETUP.md) - AWS credentials configuration
+- [Zscaler AI Gateway Setup](ZSCALER_AI_GATEWAY_BEDROCK_SETUP.md) - ZGuard configuration
+
+## Support & References
+
+- [Zscaler Developer Portal](https://help.zscaler.com/developer)
+- [AWS Bedrock Documentation](https://docs.aws.amazon.com/bedrock/)
+- [Zscaler MCP Server](https://github.com/zscaler/zscaler-mcp-server)
+- [Model Context Protocol](https://modelcontextprotocol.io/)
+
+## Version
+
+- **Version:** 2.0
+- **Last Updated:** January 2026
+- **Python:** 3.9+
+- **AWS Bedrock:** Claude 3.5 Sonnet
+- **MCP Protocol:** Latest
 
 ---
 
-**Ready to get started?** Run `python bedrock_agent_with_ZGuard.py` and start chatting! 🚀
+## License
 
-For detailed documentation, see **BEDROCK_ZGUARD_AGENT_GUIDE.md** in this folder.
+This project is provided as-is for Zscaler customers to automate operations.

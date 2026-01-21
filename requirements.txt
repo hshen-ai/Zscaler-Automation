@@ -1,6 +1,0 @@
-# Core dependencies
-python-dotenv==1.1.1
-boto3==1.35.0
-
-# For Cloud NSS agent
-# (boto3 is already listed above)
