@@ -37,3 +37,11 @@ Thumbs.db
 
 # MCP settings (may contain paths)
 **/cline_mcp_settings.json
+API_TESTING_GUIDE.md
+cloud_nss_agent.py
+curl-test.md
+GITHUB_PUBLIC_GUIDE.md
+test_bedrock_direct.py
+test_zscaler_gateway.py
+ZSCALER_AI_GATEWAY_BEDROCK_SETUP.md
+bedrock_zguard_agent/output.txt
