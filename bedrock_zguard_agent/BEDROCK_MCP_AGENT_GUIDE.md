@@ -21,7 +21,6 @@ The `bedrock_mcp_agent.py` script provides a direct connection to AWS Bedrock's 
 | Library | requests (HTTP) | boto3 (AWS SDK) |
 | Network | Through Zscaler proxy | Direct internet/VPN |
 | Security Controls | ZGuard policies apply | AWS IAM only |
-| Latency | Higher (proxy hop) | Lower (direct) |
 
 ## Architecture
 
